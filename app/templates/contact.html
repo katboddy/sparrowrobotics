@@ -1,0 +1,71 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Contact</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="/static/assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="/static/assets/css/noscript.css" /></noscript>
+</head>
+<body class="is-preload">
+
+    <div id="wrapper" class="fade-in">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="/" class="logo">Sparrow Robotics</a>
+        </header>
+
+        <!-- Main -->
+        <div id="main">
+            <section class="post">
+                <header class="major">
+                    <h1>Contact Me</h1>
+                </header>
+
+                {% if success %}
+                    <p><strong>Thank you, {{ name }}! Your message has been received.</strong></p>
+                {% endif %}
+
+                <form method="post" action="/contact">
+                    <div class="fields">
+                        <div class="field">
+                            <label for="name">Name</label>
+                            <input type="text" name="name" id="name" required />
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" required />
+                        </div>
+                        <div class="field">
+                            <label for="message">Message</label>
+                            <textarea name="message" id="message" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <ul class="actions">
+                        <li><input type="submit" value="Send Message" /></li>
+                    </ul>
+                </form>
+            </section>
+        </div>
+
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul><li>&copy; Katarzyna Lauze</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/js/jquery.scrollex.min.js"></script>
+    <script src="/static/assets/js/jquery.scrolly.min.js"></script>
+    <script src="/static/assets/js/browser.min.js"></script>
+    <script src="/static/assets/js/breakpoints.min.js"></script>
+    <script src="/static/assets/js/util.js"></script>
+    <script src="/static/assets/js/main.js"></script>
+
+
+</body>
+</html>
