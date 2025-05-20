@@ -1,9 +1,10 @@
+
 ---
-title: "My First Post"
-date: "2025-04-19"
-summary: "first-post"
-slug: "first-post"
-image: "/static/assets/images/pic01.jpg"
+title: "Hello World"
+date: "2025-05-19"
+summary: "Where should I start?"
+slug: "hello-world"
+image: "/static/assets/images/post_hello_world.jpg"
 ---
 
 ## Hello, World!
