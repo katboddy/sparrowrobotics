@@ -63,7 +63,8 @@ async def post_detail(request: Request, slug: str):
                         "request": request,
                         "title": post["title"],
                         "date": post["date"],
-                        "content": html_content
+                        "content": html_content,
+                        "image": post.get("image")
                     })
     return HTMLResponse(content="Post not found", status_code=404)
 
@@ -75,7 +76,8 @@ async def about_page(request: Request):
         return templates.TemplateResponse("about.html", {
             "request": request,
             "title": post["title"],
-            "content": html_content
+            "content": html_content,
+            "image": post.get("image")
         })
 
 @app.get("/generic.html", response_class=HTMLResponse)
@@ -102,4 +104,3 @@ async def handle_contact_form(
         "success": True,
         "name": name
     })
-

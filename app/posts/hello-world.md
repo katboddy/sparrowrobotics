@@ -4,7 +4,7 @@ title: "Hello World"
 date: "2025-05-19"
 summary: "Where should I start?"
 slug: "hello-world"
-image: "/static/assets/images/post_hello_world.jpg"
+image: "/static/assets/images/post_hello_world.png"
 ---
 
 ## Hello, World!
@@ -12,6 +12,7 @@ image: "/static/assets/images/post_hello_world.jpg"
 Where should I start?
 
 - I can code 
+- I'm a trekkie 
 - I love building things
 - I love breaking things even more
 - I used to write for fun, but it was so long ago I forgot how
