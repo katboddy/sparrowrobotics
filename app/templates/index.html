@@ -1,175 +1,55 @@
-<!DOCTYPE HTML>
-<!--
-	Massively by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html lang="en">
-	<head>
-        <title>Welcome to Sparrow Robotics!</title>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="../static/assets/css/main.css" />
-        <noscript><link rel="stylesheet" href="../static/assets/css/noscript.css" /></noscript>
-    </head>
-	<body class="is-preload">
+{% extends "base.html" %}
 
-		<!-- Wrapper -->
-			<div id="wrapper" class="fade-in">
+{% block title %}Welcome to Sparrow Robotics!{% endblock %}
 
-				<!-- Intro -->
-					<div id="intro">
-						<h1>This is<br />
-                            Sparrow Robotics</h1>
-						<p>A website about my personal journey into the world of AI and Robotics.</p>
-						<ul class="actions">
-							<li><a href="#header" class="button icon solid solo fa-arrow-down scrolly">Continue</a></li>
-						</ul>
-					</div>
+{% block intro %}
+    <!-- Intro -->
+    <div id="intro">
+        <h1>This is<br />Sparrow Robotics</h1>
+        <p>A website about my personal journey into the world of AI and Data.</p>
+        <ul class="actions">
+            <li><a href="#header" class="button icon solid solo fa-arrow-down scrolly">Continue</a></li>
+        </ul>
+    </div>
+    {% endblock %}
 
-				<!-- Header -->
-					<header id="header">
-						<a href="index.html" class="logo">Sparrow Robotics</a>
-					</header>
+    {% block content %}
 
-				<!-- Nav -->
-					<nav id="nav">
-						<ul class="links">
-							<li class="active"><a href="index.html">Home</a></li>
-							<li><a href="/about">About</a></li>
-						</ul>
-						<ul class="icons">
-                            <li><a href="#" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-							<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-							<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-						</ul>
-					</nav>
+    <!-- Featured Post -->
+    {% if featured %}
+        <article class="post featured">
+            <header class="major">
+                <span class="date">{{ featured.date }}</span>
+                <h2><a href="/post/{{ featured.slug }}">{{ featured.title }}</a></h2>
+                <p>{{ featured.summary }}</p>
+            </header>
+            <a href="/post/{{ featured.slug }}" class="image main">
+                <img src="{{ featured.image }}" alt="{{ featured.title }}" />
+            </a>
+            <ul class="actions special">
+                <li><a href="/post/{{ featured.slug }}" class="button large">Full Story</a></li>
+            </ul>
+        </article>
+    {% endif %}
 
-				<!-- Main -->
-					<div id="main">
-
-						<!-- Featured Post -->
-                        {% if featured %}
-                            <article class="post featured">
-                                <header class="major">
-                                    <span class="date">{{ featured.date }}</span>
-                                    <h2><a href="/post/{{ featured.slug }}">{{ featured.title }}</a></h2>
-                                    <p>{{ featured.summary }}</p>
-                                </header>
-                                <a href="/post/{{ featured.slug }}" class="image main">
-                                    <img src="{{ featured.image }}" alt="{{ featured.title }}" />
-                                </a>
-                                <ul class="actions special">
-                                    <li><a href="/post/{{ featured.slug }}" class="button large">Full Story</a></li>
-                                </ul>
-                            </article>
-                        {% endif %}
-
-						<!-- Posts -->
-							<section class="posts">
-                                {% for post in posts %}
-								<article>
-									<header>
-										<span class="date">{{ post.date }}</span>
-                                        <h2><a href="/post/{{ post.slug }}">{{ post.title }}</a></h2>
-									</header>
-                                    {% if post.image %}
-                                    <a href="/post/{{ post.slug }}" class="image fit">
-                                        <img src="{{ post.image }}" alt="" />
-                                    </a>
-                                    {% endif %}
-                                    <p>{{ post.summary }}</p>
-                                    <ul class="actions special">
-                                        <li><a href="/post/{{ post.slug }}" class="button">Full Story</a></li>
-									</ul>
-								</article>
-                                {% endfor %}
-							</section>
-
-						<!-- Footer -->
-							<footer>
-{#								<div class="pagination">#}
-{#									<!--<a href="#" class="previous">Prev</a>-->#}
-{#									<a href="#" class="page active">1</a>#}
-{#									<a href="#" class="page">2</a>#}
-{#									<a href="#" class="page">3</a>#}
-{#									<span class="extra">&hellip;</span>#}
-{#									<a href="#" class="page">8</a>#}
-{#									<a href="#" class="page">9</a>#}
-{#									<a href="#" class="page">10</a>#}
-{#									<a href="#" class="next">Next</a>#}
-{#								</div>#}
-							</footer>
-
-					</div>
-
-				<!-- Footer -->
-					<footer id="footer">
-						<section>
-							<form method="post" action="/contact">
-								<div class="fields">
-									<div class="field">
-										<label for="name">Name</label>
-										<input type="text" name="name" id="name" />
-									</div>
-									<div class="field">
-										<label for="email">Email</label>
-										<input type="text" name="email" id="email" />
-									</div>
-									<div class="field">
-										<label for="message">Message</label>
-										<textarea name="message" id="message" rows="3"></textarea>
-									</div>
-								</div>
-								<ul class="actions">
-									<li><input type="submit" value="Send Message" /></li>
-								</ul>
-							</form>
-						</section>
-						<section class="split contact">
-							<section class="alt">
-								<h3>Links</h3>
-                                <p><a href="https://sparrowsonline.com">Sparrows Online</a></p>
-							</section>
-							<section>
-								<h3>Credits</h3>
-								<p><a href="https://www.mobygames.com/developer/katarzyna-boddy/credits/developerId,1036914/">Moby Games</a></p>
-							</section>
-							<section>
-								<h3>Email</h3>
-								<p><a href="mailto:kat@sparrowsonline.com">kat@sparrowsonline.com</a></p>
-							</section>
-							<section>
-								<h3>Social</h3>
-								<ul class="icons alt">
-                                    <li><a href="#" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
-									<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
-									<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a></li>
-									<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
-									<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
-								</ul>
-							</section>
-						</section>
-					</footer>
-
-				<!-- Copyright -->
-					<div id="copyright">
-						<ul><li>&copy; Katarzyna Lauze</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
-					</div>
-
-			</div>
-
-		<!-- Scripts -->
-			<script src="../static/assets/js/jquery.min.js"></script>
-            <script src="../static/assets/js/jquery.scrollex.min.js"></script>
-            <script src="../static/assets/js/jquery.scrolly.min.js"></script>
-            <script src="../static/assets/js/browser.min.js"></script>
-            <script src="../static/assets/js/breakpoints.min.js"></script>
-            <script src="../static/assets/js/util.js"></script>
-            <script src="../static/assets/js/main.js"></script>
-
-
-	</body>
-</html>
+    <!-- Posts -->
+    <section class="posts">
+        {% for post in posts %}
+            <article>
+                <header>
+                    <span class="date">{{ post.date }}</span>
+                    <h2><a href="/post/{{ post.slug }}">{{ post.title }}</a></h2>
+                </header>
+                {% if post.image %}
+                <a href="/post/{{ post.slug }}" class="image fit">
+                    <img src="{{ post.image }}" alt="" />
+                </a>
+                {% endif %}
+                <p>{{ post.summary }}</p>
+                <ul class="actions special">
+                    <li><a href="/post/{{ post.slug }}" class="button">Full Story</a></li>
+                </ul>
+            </article>
+        {% endfor %}
+    </section>
+{% endblock %}

@@ -1,102 +1,21 @@
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-        <title>{{ title }}</title>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="../static/assets/css/main.css" />
-        <noscript><link rel="stylesheet" href="../static/assets/css/noscript.css" /></noscript>
-    </head>
+{% extends "base.html" %}
 
-<body class="is-preload">
+{% block title %}{{ title }}{% endblock %}
 
-    <!-- Wrapper -->
-    <div id="wrapper">
-
-        <!-- Header -->
-        <header id="header">
-            <a href="/" class="logo">Sparrow Robotics</a>
+{% block content %}
+    <section class="post">
+        <header class="major">
+            <h1>{{ title }}</h1>
         </header>
 
-        <!-- Nav -->
-        <nav id="nav">
-            <ul class="links">
-                <li><a href="/">Home</a></li>
-                <li class="active"><a href="/about">About</a></li>
-            </ul>
-            <ul class="icons">
-                <li><a href="#" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-            </ul>
-        </nav>
-
-        <!-- Main -->
-        <div id="main">
-            <!-- Post -->
-            <section class="post">
-                <header class="major">
-                    <h1>{{ title }}</h1>
-                </header>
-
-                {% if image %}
-                <div class="image main">
-                    <img src="{{ image }}" alt="{{ title }}" />
-                </div>
-                {% endif %}
-
-                <div>
-                    {{ content | safe }}
-                </div>
-            </section>
+        {% if image %}
+        <div class="image main">
+            <img src="{{ image }}" alt="{{ title }}" />
         </div>
+        {% endif %}
 
-        <!-- Footer -->
-        <footer id="footer">
-            <section class="split contact">
-                <section class="alt">
-                    <h3>Links</h3>
-                    <p><a href="https://sparrowsonline.com">Sparrows Online</a></p>
-                </section>
-                <section>
-                    <h3>Credits</h3>
-                    <p><a href="https://www.mobygames.com/developer/katarzyna-boddy/credits/developerId,1036914/">Moby Games</a></p>
-                </section>
-                <section>
-                    <h3>Email</h3>
-                    <p><a href="mailto:kat@sparrowsonline.com">kat@sparrowsonline.com</a></p>
-                </section>
-                <section>
-                    <h3>Social</h3>
-                    <ul class="icons alt">
-                        <li><a href="#" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
-                        <li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
-                        <li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a></li>
-                        <li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
-                        <li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
-                    </ul>
-                </section>
-            </section>
-        </footer>
-
-        <!-- Copyright -->
-        <div id="copyright">
-            <ul><li>&copy; Katarzyna Lauze</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+        <div>
+            {{ content | safe }}
         </div>
-
-    </div>
-
-    <!-- Scripts -->
-    <script src="../static/assets/js/jquery.min.js"></script>
-    <script src="../static/assets/js/jquery.scrollex.min.js"></script>
-    <script src="../static/assets/js/jquery.scrolly.min.js"></script>
-    <script src="../static/assets/js/browser.min.js"></script>
-    <script src="../static/assets/js/breakpoints.min.js"></script>
-    <script src="../static/assets/js/util.js"></script>
-    <script src="../static/assets/js/main.js"></script>
-
-
-</body>
-</html>
+    </section>
+{% endblock %}
