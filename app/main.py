@@ -1,12 +1,40 @@
 from datetime import datetime
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from pydantic import EmailStr, SecretStr
+from dotenv import load_dotenv
 import os
 import markdown2
 import frontmatter
+import logging
+
+# Set up logging at the top of your file
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
+
+load_dotenv()
+
+default_email = "example@gmail.com"
+
+# Email Configuration
+conf = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=SecretStr(os.getenv("MAIL_PASSWORD")),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.sendgrid.net",
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True
+)
+
+fastmail = FastMail(conf)
 
 app = FastAPI()
 
@@ -90,17 +118,47 @@ async def redirect_to_home():
 
 @app.post("/contact", response_class=HTMLResponse)
 async def handle_contact_form(
-        request: Request,
-        name: str = Form(...),
-        email: str = Form(...),
-        message: str = Form(...)
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    message: str = Form(...)
 ):
-    # You can log, save to DB, send email, etc.
-    print(f"Contact Form Submission:\nName: {name}\nEmail: {email}\nMessage: {message}")
+    try:
+        recipient = os.getenv("MAIL_TO")
+        if not recipient:
+            raise ValueError("MAIL_TO is not set in environment variables")
 
-    # Optionally display a "thank you" page or redirect
-    return templates.TemplateResponse("contact.html", {
-        "request": request,
-        "success": True,
-        "name": name
-    })
+        logger.debug(f"Mail config: MAIL_USERNAME={conf.MAIL_USERNAME}, MAIL_FROM={conf.MAIL_FROM}")
+
+        message_schema = MessageSchema(
+            subject=f"Contact Form Submission from {name}",
+            recipients=[recipient],
+            body=f"""
+                New contact form submission:
+                
+                Name: {name}
+                Email: {email}
+                
+                Message:
+                {message}
+            """,
+            subtype="plain",
+            headers={"Reply-To": email}
+        )
+
+        await fastmail.send_message(message_schema)
+        logger.info("Email sent successfully")
+
+        return templates.TemplateResponse("contact.html", {
+            "request": request,
+            "success": True,
+            "name": name
+        })
+
+    except Exception as e:
+        logger.error(f"Failed to send email: {str(e)}", exc_info=True)
+        return templates.TemplateResponse("contact.html", {
+            "request": request,
+            "error": True,
+            "message": "Failed to send message. Please try again later."
+        })

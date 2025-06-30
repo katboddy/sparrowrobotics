@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+    <section>
+        {% if success %}
+            <h2>Thank you, {{ name }}!</h2>
+            <p>Your message has been sent successfully. We'll get back to you soon.</p>
+            <ul class="actions">
+                <li><a href="/" class="button">Return to Home</a></li>
+            </ul>
+        {% elif error %}
+            <h2>Oops!</h2>
+            <p>{{ message }}</p>
+            <ul class="actions">
+                <li><a href="javascript:history.back()" class="button">Go Back</a></li>
+            </ul>
+        {% endif %}
+    </section>
+{% endblock %}
