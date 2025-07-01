@@ -16,20 +16,34 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Build and push image to ACR
+    - name: Build and push images to ACR
       uses: azure/docker-login@v1
       with:
         login-server: sparrowroboticsacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-    
+
     - run: |
-        docker build -f Dockerfile.prod -t sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }} .
-        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }}
-    
+        # Build and push web app image
+        docker build -f Dockerfile.prod -t sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }} .
+        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }}
+        
+        # Build and push Nginx image
+        docker build -f nginx/azure/Dockerfile -t sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }} nginx/azure
+        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }}
+
+    - name: Update Container App YAML
+      run: |
+        cat > container-app-update.yaml << EOF
+        properties:
+          template:
+            containers:
+              - name: web
+                image: sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }}
+              - name: nginx
+                image: sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }}
+        EOF
+
     - name: Deploy to Azure Container Apps
-      uses: azure/containerapp-deploy@v1
-      with:
-        resource-group: sparrowrobotics-rg
-        name: sparrowrobotics
-        image: sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }}
+      run: |
+        az containerapp update --resource-group sparrowrobotics-rg --name sparrowrobotics --yaml container-app-update.yaml

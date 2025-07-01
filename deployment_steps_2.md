@@ -158,26 +158,22 @@ After deploying your application, you'll need to configure your custom domain fr
 az containerapp show --name sparrowrobotics --resource-group sparrowrobotics-rg --query properties.configuration.ingress.fqdn -o tsv
 ```
 
-Save this domain name (it will look like `sparrowrobotics.randomstring.westus.azurecontainerapps.io`).
+Save this domain name (it will look like `sparrowrobotics.lemonriver-f1d6d304.westus.azurecontainerapps.io`).
 
-### Step 2: Add Your Custom Domain to Azure Container Apps
+### Step 2: Try to add the hostname which will fail but give you the validation information
 
 ```bash
-# Add your custom domain to the Container App
 az containerapp hostname add --name sparrowrobotics --resource-group sparrowrobotics-rg --hostname www.sparrowrobotics.ca
 ```
 
-### Step 3: Get the Validation Records
-
-```bash
-# Get the validation records for your custom domain
-az containerapp hostname list --name sparrowrobotics --resource-group sparrowrobotics-rg
+This command will fail with an error message that includes the required validation ID, similar to:
+```
+(InvalidCustomHostNameValidation) A TXT record pointing from asuid.www.sparrowrobotics.ca to [VALIDATION_ID] was not found.
 ```
 
-This will return a JSON object containing the validation records you need to add to your DNS configuration.
+You should extract the validation ID from this error message and use it to create the required DNS records:
 
-### Step 4: Configure DNS Records in NameCheap
-
+### Step 3: Configure DNS Records in NameCheap
 1. Log in to your NameCheap account
 2. Go to "Domain List" and select your domain (sparrowrobotics.ca)
 3. Click "Manage" and then select the "Advanced DNS" tab
@@ -187,19 +183,19 @@ This will return a JSON object containing the validation records you need to add
    ```
    Type: CNAME
    Host: www
-   Value: [your-container-app-default-domain] (from Step 1)
+   Value: sparrowrobotics.lemonriver-f1d6d304.westus.azurecontainerapps.io
    TTL: Automatic
    ```
 
-   b. TXT Record for domain validation:
+  b. TXT Record for domain validation:
    ```
    Type: TXT
    Host: asuid.www
-   Value: [validation-id] (from Step 3)
+   Value: 90DF5A6B3BE4C0371AC6AD22A95A4041B59FE821794EC23A17E5D829578064DE
    TTL: Automatic
    ```
 
-   c. If you want to use the apex domain (sparrowrobotics.ca without www):
+  c. If you want to use the apex domain (sparrowrobotics.ca without www):
    ```
    Type: A
    Host: @
@@ -208,81 +204,28 @@ This will return a JSON object containing the validation records you need to add
    ```
    
    Note: For the apex domain, you might need to use Azure's DNS service or a service like Cloudflare that supports CNAME flattening, as NameCheap doesn't support ALIAS records.
+   Wait for DNS propagation (15 minutes to 48 hours)
 
-### Step 5: Verify Domain Ownership
+### Step 4: Try adding the hostname again:
 
-```bash
-# Check the validation status of your custom domain
-az containerapp hostname show --name sparrowrobotics --resource-group sparrowrobotics-rg --hostname www.sparrowrobotics.ca
-```
+   ```bash
+   az containerapp hostname add --name sparrowrobotics --resource-group sparrowrobotics-rg --hostname www.sparrowrobotics.ca
+   ```
 
-It may take some time for DNS changes to propagate (typically 15 minutes to 48 hours).
+This approach uses the error message from the initial attempt to add the hostname as the source of the validation information, which is a common pattern when working with Azure CLI for domain validation.
 
-### Step 6: Enable HTTPS for Your Custom Domain
+
+### Step 5 Enable HTTPS for Your Custom Domain
 
 Azure Container Apps automatically provisions and manages SSL certificates for custom domains. Once your domain is validated, HTTPS will be automatically enabled.
 
 To verify:
 ```bash
 # Check if HTTPS is enabled
-az containerapp hostname show --name sparrowrobotics --resource-group sparrowrobotics-rg --hostname www.sparrowrobotics.ca --query properties.bindingType
+az containerapp hostname list --name sparrowrobotics --resource-group sparrowrobotics-rg --query "[?hostname=='www.sparrowrobotics.ca'].bindingType" -o tsv
 ```
 
-## Update GitHub Actions for Multi-Container Deployment
-
-Update your `.github/workflows/azure-deploy.yml` file to support the multi-container setup:
-
-```yaml
-name: Deploy to Azure Container Apps
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Log in to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Build and push images to ACR
-      uses: azure/docker-login@v1
-      with:
-        login-server: sparrowroboticsacr.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
-    
-    - run: |
-        # Build and push web app image
-        docker build -f Dockerfile.prod -t sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }} .
-        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }}
-        
-        # Build and push Nginx image
-        docker build -f nginx/azure/Dockerfile -t sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }} nginx/azure
-        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }}
-    
-    - name: Update Container App YAML
-      run: |
-        cat > container-app-update.yaml << EOF
-        properties:
-          template:
-            containers:
-              - name: web
-                image: sparrowroboticsacr.azurecr.io/sparrowrobotics-web:${{ github.sha }}
-              - name: nginx
-                image: sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:${{ github.sha }}
-        EOF
-    
-    - name: Deploy to Azure Container Apps
-      run: |
-        az containerapp update --resource-group sparrowrobotics-rg --name sparrowrobotics --yaml container-app-update.yaml
-```
+The output should be `TLS` if HTTPS is enabled.
 
 ## Monitoring and Troubleshooting
 
