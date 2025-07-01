@@ -2,6 +2,9 @@
 
 For detailed development information, see the [Developer Guide](developer_guide.md).
 
+For detailed deployment information, see the [Deployment Guide](deployment_guide.md).
+
+
 | Command          | What it does                                          |
 |------------------|-------------------------------------------------------|
 | `make dev`       | Run the dev server with code reloading                |
