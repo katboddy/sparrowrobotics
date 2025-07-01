@@ -1,0 +1,35 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Build and push image to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: sparrowroboticsacr.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    
+    - run: |
+        docker build -f Dockerfile.prod -t sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }} .
+        docker push sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }}
+    
+    - name: Deploy to Azure Container Apps
+      uses: azure/containerapp-deploy@v1
+      with:
+        resource-group: sparrowrobotics-rg
+        name: sparrowrobotics
+        image: sparrowroboticsacr.azurecr.io/sparrowrobotics:${{ github.sha }}

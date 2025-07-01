@@ -5,3 +5,6 @@ __pycache__/
 .venv313
 *.sqlite3
 *.log
+.az.json
+.env
+.venv314
