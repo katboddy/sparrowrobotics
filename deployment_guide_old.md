@@ -1,32 +1,33 @@
-
 # Deploying to Azure with Secure Credential Handling
 
-This guide describes the current state of the deployment for your FastAPI web application to Azure Container Apps, with secure credential handling using Azure Key Vault.
+Based on the analysis of your Docker setup, here's a comprehensive guide for deploying your application to Azure while securely handling the credentials in your `.env` file, implementing a multi-container setup with Nginx, and configuring your NameCheap custom domain.
 
 ## Project Analysis
 
 Your project is a FastAPI web application with:
 - A production Docker setup using `Dockerfile.prod` and `docker-compose.prod.yaml`
+- Nginx as a reverse proxy
 - Sensitive credentials in the `.env` file (particularly a SendGrid API key)
 - Email functionality that depends on these environment variables
 
-## Current Deployment Architecture
+## Recommended Azure Deployment Approach
 
-The application is currently deployed as a **single-container setup** directly exposing the FastAPI application:
+### 1. Azure Container Apps (Recommended)
 
-- **Container Name**: sparrowrobotics
-- **Image**: sparrowroboticsacr.azurecr.io/sparrowrobotics-web:latest
-- **Exposed Port**: 8000
-- **Credentials**: Securely stored in Azure Key Vault and injected as environment variables
+Azure Container Apps is ideal for your setup because it:
+- Supports multi-container applications
+- Integrates with GitHub for CI/CD
+- Provides secure environment variable management
+- Offers built-in scaling and HTTPS
 
-## Deployment Steps
+### 2. Deployment Steps
 
-### Step 1: Prepare Your GitHub Repository
+#### Step 1: Prepare Your GitHub Repository
 
 1. Ensure your `.env` file is in `.gitignore` (which it already is)
 2. Push your code to GitHub if not already done
 
-### Step 2: Set Up Azure Container Registry (ACR)
+#### Step 2: Set Up Azure Container Registry (ACR)
 
 ```bash
 # Login to Azure
@@ -42,7 +43,7 @@ az acr create --resource-group sparrowrobotics-rg --name sparrowroboticsacr --sk
 az acr update --name sparrowroboticsacr --admin-enabled true
 ```
 
-### Step 3: Register Required Resource Providers
+#### Step 3: Register Required Resource Providers
 
 Before creating the Container App Environment, you need to ensure all required resource providers are registered with your Azure subscription:
 
@@ -54,7 +55,7 @@ az provider register -n Microsoft.KeyVault --wait
 
 This step is necessary because Azure Container Apps uses Azure Log Analytics (part of the Microsoft.OperationalInsights namespace) for logging and monitoring. The `--wait` flag ensures the command doesn't return until the registration is complete, which may take a few minutes.
 
-### Step 4: Create Azure Container App Environment
+#### Step 4: Create Azure Container App Environment
 
 ```bash
 # Create Container App Environment
@@ -64,7 +65,7 @@ az containerapp env create \
   --location westus
 ```
 
-### Step 5: Secure Credential Management with Azure Key Vault
+#### Step 5: Secure Credential Management with Azure Key Vault
 
 For secure handling of credentials, use Azure Key Vault:
 
@@ -81,9 +82,9 @@ export MAIL_FROM="your-sender-email"
 
 # Give your user role as a kv officer
 USER_OBJECT_ID=$(az ad signed-in-user show --query id -o tsv)
-az role assignment create \
- --assignee $USER_OBJECT_ID \
- --role "Key Vault Secrets Officer" \
+az role assignment create  \
+ --assignee $USER_OBJECT_ID   \
+ --role "Key Vault Secrets Officer"  \
  --scope $(az keyvault show --name sparrowrobotics-kv --query id -o tsv)
 
 # Add your secrets to Key Vault (values come from environment variables)
@@ -93,14 +94,21 @@ az keyvault secret set --vault-name sparrowrobotics-kv --name "MAIL-TO" --value 
 az keyvault secret set --vault-name sparrowrobotics-kv --name "MAIL-FROM" --value "$MAIL_FROM"
 ```
 
-### Step 6: Build and Push the Web Application Image to ACR
+#### Step 6: Multi-Container Setup for Azure Container Apps
+
+Your current setup uses two containers (web application and Nginx) as defined in your `docker-compose.prod.yaml`. To properly deploy this architecture to Azure Container Apps:
+
+##### Step 6a: Build and Push Both Images to ACR
 
 ```bash
 # Build and push the web application image
 az acr build --registry sparrowroboticsacr --image sparrowrobotics-web:latest --file Dockerfile.prod .
+
+# Build and push the Nginx image
+az acr build --registry sparrowroboticsacr --image sparrowrobotics-nginx:latest --file nginx/azure/Dockerfile nginx/azure
 ```
 
-### Step 7: Deploy the Single-Container Application
+##### Step 6b: Deploy the Multi-Container Application
 
 ```bash
 # Create the Container App with managed identity
@@ -111,9 +119,8 @@ az containerapp create \
   --registry-server sparrowroboticsacr.azurecr.io \
   --registry-username sparrowroboticsacr \
   --registry-password $(az acr credential show -n sparrowroboticsacr --query "passwords[0].value" -o tsv) \
-  --image sparrowroboticsacr.azurecr.io/sparrowrobotics-web:latest \
   --ingress external \
-  --target-port 8000 \
+  --target-port 80 \
   --system-assigned
 
 # Get the principal ID of the Container App
@@ -124,12 +131,32 @@ az role assignment create \
   --assignee $principalId \
   --role "Key Vault Secrets User" \
   --scope $(az keyvault show --name sparrowrobotics-kv --query id -o tsv)
+
+# Update the Container App to use multiple containers
+az containerapp update \
+  --name sparrowrobotics \
+  --resource-group sparrowrobotics-rg \
+  --container-name web \
+  --image sparrowroboticsacr.azurecr.io/sparrowrobotics-web:latest
+
+# Add the Nginx container
+az containerapp update \
+  --name sparrowrobotics \
+  --resource-group sparrowrobotics-rg \
+  --container-name nginx \
+  --image sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:latest \
+  --container-command "" \
+  --container-args "" \
+  --cpu 0.5 \
+  --memory 1.0Gi \
+  --min-replicas 1 \
+  --max-replicas 3
 ```
 
-### Step 8: Configure Environment Variables in Container App
+#### Step 7: Configure Environment Variables in Container App
 
 ```bash
-# Configure the secrets for the container
+# Configure the secrets for the web container
 az containerapp secret set \
   --name sparrowrobotics \
   --resource-group sparrowrobotics-rg \
@@ -139,11 +166,11 @@ az containerapp secret set \
     mail-to=keyvaultref:https://sparrowrobotics-kv.vault.azure.net/secrets/MAIL-TO,identityref:system \
     mail-from=keyvaultref:https://sparrowrobotics-kv.vault.azure.net/secrets/MAIL-FROM,identityref:system
 
-# Set environment variables for the container
+# Set environment variables for the web container
 az containerapp update \
   --name sparrowrobotics \
   --resource-group sparrowrobotics-rg \
-  --container-name sparrowrobotics \
+  --container-name web \
   --set-env-vars \
     MAIL_USERNAME=secretref:mail-username \
     MAIL_PASSWORD=secretref:mail-password \
@@ -151,7 +178,7 @@ az containerapp update \
     MAIL_FROM=secretref:mail-from
 ```
 
-## Custom Domain Configuration with NameCheap
+### 3. Custom Domain Configuration with NameCheap
 
 After deploying your application, you'll need to configure your custom domain from NameCheap. Here are the detailed steps:
 
@@ -240,57 +267,28 @@ az containerapp hostname list --name sparrowrobotics --resource-group sparrowrob
 
 The output should be `TLS` if HTTPS is enabled.
 
-## Setting Up GitHub Actions for CI/CD
+### 4. Setting Up GitHub Actions for CI/CD
 
-Make sure you have a `.github/workflows/azure-deploy.yml` file
+Create a `.github/workflows/azure-deploy.yml` file:
 
 To set up the GitHub secrets:
 
-#### Step 1: Create a service principal:
+1. Create a service principal:
 ```bash
 az ad sp create-for-rbac --name "sparrowrobotics-github" --role contributor \
   --scopes /subscriptions/5a3935a9-d61b-444f-a13f-194cd9bd49ad/resourceGroups/sparrowrobotics-rg \
   --sdk-auth
 ```
 
-#### Step 2: Add the result JSON output as a GitHub secret (via GUI) named `AZURE_CREDENTIALS`
+2. Add the result JSON output as a GitHub secret (via GUI) named `AZURE_CREDENTIALS`
 
-#### Step 3: Add ACR credentials as secrets:
+3. Add ACR credentials as secrets:
 ```bash
 ACR_USERNAME=$(az acr credential show -n sparrowroboticsacr --query "username" -o tsv)
 ACR_PASSWORD=$(az acr credential show -n sparrowroboticsacr --query "passwords[0].value" -o tsv)
 ```
 
-#### Step 4: Add these as GitHub secrets `ACR_USERNAME` and `ACR_PASSWORD`
-
-
-
-## Future Enhancements
-
-### 1. Multi-Container Setup with Nginx (Optional, as I had troubles with it)
-
-For additional security and performance benefits, you could enhance the deployment with a multi-container setup that includes Nginx as a reverse proxy:
-
-```bash
-# Build and push the Nginx image
-az acr build --registry sparrowroboticsacr --image sparrowrobotics-nginx:latest --file nginx/azure/Dockerfile nginx/azure
-
-# Add the Nginx container
-az containerapp update \
-  --name sparrowrobotics \
-  --resource-group sparrowrobotics-rg \
-  --container-name nginx \
-  --image sparrowroboticsacr.azurecr.io/sparrowrobotics-nginx:latest \
-  --cpu 0.5 \
-  --memory 1.0Gi
-
-# Update the ingress to route traffic through Nginx
-az containerapp ingress update \
-  --name sparrowrobotics \
-  --resource-group sparrowrobotics-rg \
-  --target-port 80
-```
-
+4. Add these as GitHub secrets `ACR_USERNAME` and `ACR_PASSWORD`
 
 ## Monitoring and Troubleshooting
 
