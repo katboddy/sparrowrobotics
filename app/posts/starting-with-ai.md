@@ -8,6 +8,10 @@ image: "/static/assets/images/project7.jpg"
 
 ## Starting with AI
 
+"Executives at AI infrastructure companies make bold claims, which developers often find fall spectacularly flat." - Gergely Orosz
+<br>
+<br>
+
 AI crash-landed into our lives with all the grace of an elephant in a china store. Between ambiguous work policies when you are both expected to use AI for "everything" and denied requests for the actual AI tools, curiosity mixed-up with apprehension, new models, tools, papers popping out seemingly overnight - it feels like trying to catch a runway train.
 <br>
 <br>
