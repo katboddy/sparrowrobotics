@@ -18,12 +18,13 @@ AI crash-landed into our lives with all the grace of an elephant in a china stor
 Before I let the train run rampage on my file system, I wanted to figure some things out. Where do those words in ChatGPT came from and how did we leap from fitting the line in linear regression to Claude telling me what my exercise plan could look like? Is an LLM just a generalization of that line, but with WAY more parameters and dimensions? Mrs Weasley famously said "Never trust anything that can think for itself if you can't see where it keeps its brain." (J.K. Rowling, Harry Potter and the Chamber of Secrets). I have decided to learn AI and about AI in parallel.
 <br>
 <br>
-I chose the DeepLearningAI Courses to gently "break myself into" AI. It has three specializations:
+I chose the DeepLearningAI Courses to gently "break myself into" AI. It has three specializations that introduce the subject of AI, both by history and difficulty:
+
 - Machine Learning
 - Deep Learning
 - NLP
 
-that introduce the subject of AI, both by history and difficulty. What also attracted me to those courses was the mathematical detail and the instructor: Andrew Ng is a great teacher, skillfull, knowledgfull and passionate about his subject without sounding like a zealot.
+What also attracted me to those courses was the mathematical detail and the instructor: Andrew Ng is a great teacher, skillfull, knowledgfull and passionate about his subject without sounding like a zealot.
 <br>
 <br>
 For the "practical usage" I am working with GitHub Copilot at work, IntelliJ Junie at home and I also use ChatGPT.
