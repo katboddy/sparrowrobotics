@@ -1,6 +1,6 @@
 # Compose files
-COMPOSE_DEV=docker-compose.yml
-COMPOSE_PROD=docker-compose.prod.yml
+COMPOSE_DEV=docker-compose.yaml
+COMPOSE_PROD=docker-compose.prod.yaml
 
 # Default target
 .PHONY: help
@@ -16,20 +16,20 @@ help:
 # Development
 .PHONY: dev
 dev:
-	docker compose -f $(COMPOSE_DEV) up --build
+	docker-compose -f $(COMPOSE_DEV) up --build
 
 .PHONY: dev-down
 dev-down:
-	docker compose -f $(COMPOSE_DEV) down -v
+	docker-compose -f $(COMPOSE_DEV) down -v
 
 # Production
 .PHONY: prod
 prod:
-	docker compose -f $(COMPOSE_PROD) --env-file $(ENV_FILE) up --build -d
+	docker-compose -f $(COMPOSE_PROD) --env-file $(ENV_FILE) up --build -d
 
 .PHONY: prod-down
 prod-down:
-	docker compose -f $(COMPOSE_PROD) down -v
+	docker-compose -f $(COMPOSE_PROD) down -v
 
 # Clean all Docker resources
 .PHONY: clean
@@ -39,4 +39,4 @@ clean:
 # Rebuild dev
 .PHONY: rebuild
 rebuild: dev-down
-	docker compose -f $(COMPOSE_DEV) up --build
+	docker-compose -f $(COMPOSE_DEV) up --build

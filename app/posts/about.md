@@ -28,10 +28,14 @@ I also stopped telling myself stories and writing.
 <br>
 <br>
 Couple years ago I realized that programming is not all in terms
-of creativity, so I started making amigurumis. But the resulting
-plushies couldn't do things <i>on their own</i>.
+of creativity, so I started crocheting amigurumis and knitting sweaters.
 <br>
 <br>
-Could I learn enough about Artificial Intelligence to make something that
-feels both creative but can also do, let's say accounting for me?
-This journal will try to answer this question. 
+Now, as a tech lead, I find myself doing less and less programming. 
+I attend too many meetings. I review too many RFCs. And what I miss 
+the most is the learning. The discovery. Writing things down. 
+<i>Telling myself stories.</i> Not always about programming. 
+Not even always about science stuff. What I learned could be intangible 
+and this blog is an attempt to capture it.
+<br>
+
